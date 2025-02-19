@@ -1,17 +1,17 @@
 package Networking;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
-/**
- * 
- * @author cjaiswal
- *
- *  
- * 
- */
+
 public class UDPClient 
 {
     DatagramSocket Socket;
+
+    private static File getFileListing(){
+        File homeDirectory = new File(System.getProperty("user.home"));
+        return homeDirectory;
+    }
 
     public UDPClient() 
     {
@@ -23,7 +23,7 @@ public class UDPClient
         try 
         {
             Socket = new DatagramSocket();
-            InetAddress IPAddress = InetAddress.getByName("localhost");
+            InetAddress IPAddress = InetAddress.getByName("10.111.111.93");
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
             byte[] data = sentence.getBytes();
@@ -50,8 +50,8 @@ public class UDPClient
         }
     }
 
-    public static void main(String[] args) 
-    {
+    public static void main(String[] args) {
+        System.out.println(getFileListing());
         UDPClient client = new UDPClient();
         client.createAndListenSocket();
     }
