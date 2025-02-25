@@ -66,6 +66,12 @@ public class UDPClient
                 Socket.receive(incomingPacket);
                 String response = new String(incomingPacket.getData());
                 System.out.println("Response from server:" + response);
+
+                //protocol
+                Integer packetSend = 1;
+                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
+                Socket.send(newPacket.getPacket());
+
                 Socket.close();
             }
             catch (UnknownHostException e) 
