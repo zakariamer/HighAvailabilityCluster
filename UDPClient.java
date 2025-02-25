@@ -1,4 +1,4 @@
-package Networking;
+//package Networking;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class UDPClient
         try 
         {
             Socket = new DatagramSocket();
-            InetAddress IPAddress = InetAddress.getByName("10.111.111.93");
+            InetAddress IPAddress = InetAddress.getByName("127.0.0.1");
             byte[] incomingData = new byte[1024];
             String sentence = "Viehmann";
             byte[] data = sentence.getBytes();
@@ -34,6 +34,14 @@ public class UDPClient
             Socket.receive(incomingPacket);
             String response = new String(incomingPacket.getData());
             System.out.println("Response from server:" + response);
+            
+
+            //my protocol
+            // Integer packetSend = 1;
+            // String[] files = {sentence};
+            // OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, files);
+            // Socket.send(newPacket.getPacket());
+
             Socket.close();
         }
         catch (UnknownHostException e) 
