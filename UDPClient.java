@@ -59,8 +59,10 @@ public class UDPClient
                 byte[] incomingData = new byte[1024];
                 String sentence = "Viehmann";
                 byte[] data = sentence.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
-                Socket.send(sendPacket);
+                Integer packetSend = 1;
+                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
+                Socket.send(newPacket.getPacket());
+                // Socket.send(sendPacket);
                 System.out.println("Message sent from client");
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 Socket.receive(incomingPacket);
@@ -68,9 +70,9 @@ public class UDPClient
                 System.out.println("Response from server:" + response);
 
                 //protocol
-                Integer packetSend = 1;
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
-                Socket.send(newPacket.getPacket());
+                // Integer packetSend = 1;
+                // OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
+                // Socket.send(newPacket.getPacket());
 
                 Socket.close();
             }
