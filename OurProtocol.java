@@ -154,10 +154,13 @@ public class OurProtocol implements Serializable{
      * Prints out the details of this packet's protocol
      */
     public void protocolDetails(){
+        // Protocol control
         System.out.println(" | " + "Type:" + "En-cryptid's UDP" + " | " + "Packet #: " + packetNumber + " | ");
         System.out.println("----------------------------------------------------------------------------------------------");
         System.out.println(" | " + "Destination IP:" + this.destinationIP + " | " + "Destination Port:"  + this.destinationPort + " | " + "Sender IP:"  + this.senderIP + " | " + "Sender Port:" + this.senderPort + " | ");
         System.out.println("----------------------------------------------------------------------------------------------");
+        
+        // Protocol data
         System.out.println(files());
     }
 
