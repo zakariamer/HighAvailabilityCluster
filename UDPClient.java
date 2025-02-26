@@ -31,7 +31,8 @@ public class UDPClient
             return sb.toString();
         }
 
-    public static void heartBeat(UDPClient client){
+    public static void heartBeat(){
+        
             SecureRandom random = new SecureRandom();
     
             int sec = random.nextInt(31);
@@ -41,8 +42,6 @@ public class UDPClient
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
-
-            client.createAndListenSocket();
         }
     
         public UDPClient() 
@@ -54,25 +53,29 @@ public class UDPClient
         {
             try 
             {
-                Socket = new DatagramSocket();
-                InetAddress IPAddress = InetAddress.getByName("localhost");
-                byte[] incomingData = new byte[1024];
-                String sentence = "Viehmann";
-                byte[] data = sentence.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
-                Socket.send(sendPacket);
-                System.out.println("Message sent from client");
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                Socket.receive(incomingPacket);
-                String response = new String(incomingPacket.getData());
-                System.out.println("Response from server:" + response);
+                while(true){
+                    Socket = new DatagramSocket();
+                    InetAddress IPAddress = InetAddress.getByName("localhost");
+                    byte[] incomingData = new byte[1024];
+                    String sentence = "Viehmann";
+                    byte[] data = sentence.getBytes();
+                    DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
 
-                //protocol
-                Integer packetSend = 1;
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
-                Socket.send(newPacket.getPacket());
+                    heartBeat();
+                    Socket.send(sendPacket);
+                    System.out.println("Message sent from client");
+                    DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                    Socket.receive(incomingPacket);
+                    String response = new String(incomingPacket.getData());
+                    System.out.println("Response from server:" + response);
 
-                Socket.close();
+                    //protocol
+                    Integer packetSend = 1;
+                    System.out.println(getFileListing());
+                    OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), (Integer) 9876, (Integer) 9876, packetSend, getFileListing());
+                    Socket.send(newPacket.getPacket());
+                }
+              
             }
             catch (UnknownHostException e) 
             {
@@ -92,9 +95,7 @@ public class UDPClient
             System.out.println(getFileListing());
             UDPClient client = new UDPClient();
 
-            while (true){
-                heartBeat(client);
-            }
+            client.createAndListenSocket();       
     }
 }
 

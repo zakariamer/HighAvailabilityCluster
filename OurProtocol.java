@@ -33,7 +33,7 @@ public class OurProtocol implements Serializable{
     * @param packetNum Which number packet is being sent
     * @param files The data being transfered (files for our purposes)
     */
-    public OurProtocol (InetAddress destinationIP, InetAddress senderIP, Integer destinationPort, Integer senderPort, Integer packetNum, String[] files ){
+    public OurProtocol (InetAddress destinationIP, InetAddress senderIP, Integer destinationPort, Integer senderPort, Integer packetNum, String[] files){
         this.protocolType = "En-cryptid's UDP";
         this.destinationIP = destinationIP;
         this.senderIP = senderIP;
@@ -46,6 +46,7 @@ public class OurProtocol implements Serializable{
         this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
         for(String file : files){
             this.data += "," + file;
+            System.out.println(file);
         }
 
         packet = new DatagramPacket(data.getBytes(), data.getBytes().length, destinationIP, destinationPort);
@@ -67,7 +68,9 @@ public class OurProtocol implements Serializable{
         this.destinationPort = destinationPort;
         this.senderPort = senderPort;
         this.packetNumber = packetNum;
-        this.files[1] = data;
+
+        this.files = new String[1];
+        this.files[0] = data;
 
         //packing the data into a compressable string -- protocol type, destination ip, sender ip, destination port, sender port, packet #, files
         this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum + "," + data;

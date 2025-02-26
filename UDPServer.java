@@ -1,4 +1,4 @@
-package Networking;
+//package Networking;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -48,7 +48,6 @@ public class UDPServer
                 
                 socket.send(replyPacket);
                 Thread.sleep(2000);
-                socket.close();
             }
         } 
         catch (SocketException e) 
