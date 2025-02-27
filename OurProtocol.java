@@ -3,6 +3,8 @@ import java.net.DatagramPacket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * @authors Morgan, Fahim, Zakaria
@@ -61,7 +63,7 @@ public class OurProtocol implements Serializable{
     * @param packetNum Which number packet is being sent
     * @param files The data being transfered (files for our purposes)
     */
-    public OurProtocol (InetAddress destinationIP, InetAddress senderIP, Integer destinationPort, Integer senderPort, Integer packetNum, String data ){
+    public OurProtocol (InetAddress destinationIP, InetAddress senderIP, Integer destinationPort, Integer senderPort, Integer packetNum, String data){
         this.protocolType = "En-cryptid's UDP";
         this.destinationIP = destinationIP;
         this.senderIP = senderIP;
@@ -84,50 +86,42 @@ public class OurProtocol implements Serializable{
      * Takes in a packet and formats it into the protocol structure if it is this protocol type (OurProtocol/EncryptidsUDP)
      * @param packet that is an En-cryptid UDP / OurProtocol packet
      */
-    public OurProtocol (DatagramPacket packet){
+    public OurProtocol(DatagramPacket packet) {
         String unloadData = new String(packet.getData(), 0, packet.getLength());
         String[] dataParts = unloadData.split(",");
 
-        //checks if it is an En-crypted UDP
-        if(dataParts[0].equals ("En-cryptid's UDP")){
+        if (dataParts[0].startsWith("En-cryptid's UDP")) {
             this.protocolType = "En-cryptid's UDP";
-            
+
             try {
-                this.destinationIP = (InetAddress) InetAddress.getByName(dataParts[1]);
-                this.senderIP = (InetAddress) InetAddress.getByName(dataParts[2]);
+                this.destinationIP = InetAddress.getByName(dataParts[1]);
+                this.senderIP = InetAddress.getByName(dataParts[2]);
             } catch (UnknownHostException e) {
                 System.out.println("Error in IP Loading");
                 e.printStackTrace();
             }
-            
+
             this.destinationPort = Integer.parseInt(dataParts[3]);
             this.senderPort = Integer.parseInt(dataParts[4]);
-            this.packetNumber = Integer.parseInt(dataParts[5]);
 
-            for(int file = 6; file < dataParts.length; file ++){
-                this.files[file - 6] = dataParts[file];
+            if (dataParts[5].equals("null") || dataParts[5].isEmpty()) {
+                this.packetNumber = -1;  // Default value or handle appropriately
+            } else {
+                this.packetNumber = Integer.parseInt(dataParts[4]);
             }
 
-            this.packet = packet;            
-             
-        } 
+            List<String> filteredFiles = new ArrayList<>();
+            for (int fileIndex = 6; fileIndex < dataParts.length; fileIndex++) {
+                if (!dataParts[fileIndex].equals(".git")) {  // Exclude ".git"
+                    filteredFiles.add(dataParts[fileIndex]);
+                }
+            }
+            this.files = filteredFiles.toArray(new String[0]);
 
-        //if not, it uses the packet's given information to
-        // else {
-        //     this.protocolType = "En-cryptid's UDP";
-        //     try {
-        //         this.destinationIP = Inet4Address.getByName("127.0.0.1");
-        //     } catch (UnknownHostException e) {
-        //         // TODO Auto-generated catch block
-        //         e.printStackTrace();
-        //     }
-        //     this.senderIP = packet.getAddress();
-        //     this.destinationPort = packet.getPort();
-        //     this.senderPort = packet.getPort();
-        //     this.packetNumber = null;
-        //     this.files[0] = packet.getData().toString();
-        // }
+            this.packet = packet;
+        }
     }
+
 
     /**
      * Gets the packet's number
@@ -141,9 +135,10 @@ public class OurProtocol implements Serializable{
      * Gets the files/data 
      * @return String of files
      */
-    public String files(){
-        return this.files.toString();
+    public String files() {
+        return (this.files != null) ? String.join(", ", this.files) : "No files available";
     }
+    
 
     /**
      * Gets the packet in this protocol's format

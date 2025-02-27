@@ -29,8 +29,7 @@ public class UDPServer
 
             while (true) 
             {
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, 
-                		incomingData.length);
+                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 socket.receive(incomingPacket);
                 String message = new String(incomingPacket.getData());
                 InetAddress IPAddress = incomingPacket.getAddress();
@@ -39,6 +38,9 @@ public class UDPServer
                 System.out.println("Received message from client: " + message);
                 System.out.println("Client IP:"+IPAddress.getHostAddress());
                 System.out.println("Client port:"+port);
+
+                OurProtocol deconstructPacket = new OurProtocol(incomingPacket);
+                deconstructPacket.protocolDetails();
                 
                 String reply = "Thank you for the message";
                 byte[] data = reply.getBytes();
