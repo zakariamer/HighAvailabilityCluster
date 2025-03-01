@@ -21,7 +21,7 @@ public class UDPClient {
 
         List<String> fileNames = new ArrayList<>();
         for (File file : fileListing) {
-            if (!file.getName().equals(".git")) {  // Exclude ".git" from the file list
+            if (!file.getName().equals(".git")) {  
                 fileNames.add(file.getName());
             }
         }
@@ -33,7 +33,7 @@ public class UDPClient {
     public static void heartBeat() {
         SecureRandom random = new SecureRandom();
 
-        int sec = random.nextInt(5) + 1;
+        int sec = random.nextInt(30) + 1;
 
         System.out.println("Waiting for " + sec + " seconds");
 
