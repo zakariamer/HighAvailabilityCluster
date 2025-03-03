@@ -8,7 +8,8 @@ import java.security.SecureRandom;
 
 public class UDPClient {
 
-    DatagramSocket Socket;
+    private DatagramSocket Socket;
+    private int packetNumber;
 
     private static String[] getFileListing() {
         String filePath = System.getProperty("user.dir");
@@ -54,9 +55,8 @@ public class UDPClient {
                 byte[] incomingData = new byte[1024];
 
                 // Create and send a packet
-                Integer packetSend = 1;
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876, packetSend, fileList);
+                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876, packetNumber++, fileList);
 
                 heartBeat();
                 Socket.send(newPacket.getPacket());  
