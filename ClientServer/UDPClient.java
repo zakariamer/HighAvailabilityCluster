@@ -1,3 +1,5 @@
+package ClientServer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +11,7 @@ import java.security.SecureRandom;
 public class UDPClient {
 
     private DatagramSocket Socket;
-    private int packetNumber;
+    private int packetNumber = 0;
 
     private static String[] getFileListing() {
         String filePath = System.getProperty("user.dir");

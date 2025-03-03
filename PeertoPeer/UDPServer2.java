@@ -1,4 +1,4 @@
-//package networking;
+package PeertoPeer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
