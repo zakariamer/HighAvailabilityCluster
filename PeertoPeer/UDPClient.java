@@ -1,10 +1,13 @@
-//package PeertoPeer;
+package PeertoPeer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,12 +22,18 @@ public class UDPClient {
     // hint:Create 3 three threads those 3 are recieve, send/heartbeat and check heartbeat(Determine if the nodes )
     // hint: the fourth thread is main for printing 
 
+    //packet/socket sending details
     private DatagramSocket socket;
     private int packetNumber = 0;
-    
+
     private static  ExecutorService executorService;
     private int serverPort = 9876;
     private static final ThreadLocal<Integer> threadNumber = new ThreadLocal<>();
+    
+    //node checking details
+    HashMap<InetAddress,Integer> map = new HashMap<>();
+    HashMap<InetAddress,String> mapAvailable = new HashMap<>();
+    ScheduledExecutorService timer = Executors.newScheduledThreadPool(2);
 
     private static String[] getFileListing() {
         String filePath = System.getProperty("user.dir");
@@ -87,10 +96,10 @@ public class UDPClient {
         try {
             while (true) {
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
-                        serverPort, packetNumber, fileList);
+                // OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
+                //         serverPort, packetNumber, fileList);
 
-                        System.out.println("Sending message #" + packetNumber);
+                System.out.println("Sending message #" + packetNumber);
 
 
                 // read config
@@ -118,14 +127,14 @@ public class UDPClient {
                 }
 
                 heartBeat();
-                socket.send(newPacket.getPacket());
+                //socket.send(newPacket.getPacket());
                 System.out.println("Message sent from client");
                 packetNumber++;
 
                 // wait time before sending the next packet
                 Thread.sleep(1000);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch ( InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -138,6 +147,11 @@ public class UDPClient {
         while (true) {
             try {
                 socket.receive(incomingPacket);
+
+                //put hash
+                map.put(incomingPacket.getAddress(), 0);
+                mapAvailable.put(incomingPacket.getAddress(), " - Alive");
+
                 
                 String message = new String(incomingPacket.getData()).trim();
                 System.out.println("Received: " + message);
@@ -202,11 +216,21 @@ public class UDPClient {
     // }
 
     public void checkHeartbeat(){
-        while(true){
-            System.out.println("Checking heartbeat ...");
-            heartBeat();
-            System.out.println("Possible node failure.");
-        }
+        timer.scheduleAtFixedRate(() -> {
+            for (Map.Entry<InetAddress, Integer> entry : map.entrySet()){
+                if (entry.getValue() >= 30){
+                    mapAvailable.put(entry.getKey(), " - Dead");
+                }
+            }
+            System.out.println("Current connections: " + mapAvailable);
+        }, 0, 30, TimeUnit.SECONDS);
+
+        timer.scheduleAtFixedRate(() -> {
+            for (Map.Entry<InetAddress, Integer> entry : map.entrySet()){
+                map.put(entry.getKey(),entry.getValue() + 1);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+
     }
 
     public void start(InetAddress IPAddress) {
