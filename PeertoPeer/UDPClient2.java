@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  *  
  * 
  */
-public class UDPServer {
+public class UDPClient2 {
 
     DatagramSocket socket = null;
 
@@ -26,7 +26,7 @@ public class UDPServer {
 
     ScheduledExecutorService timer = Executors.newScheduledThreadPool(2);
 
-    public UDPServer() {
+    public UDPClient2() {
 
     }
 
@@ -101,7 +101,7 @@ public class UDPServer {
 
     public static void main(String[] args) 
     {
-        UDPServer server = new UDPServer();
+        UDPClient2 server = new UDPClient2();
         server.serverTimer();
         server.createAndListenSocket();
     }
