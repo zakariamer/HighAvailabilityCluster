@@ -15,7 +15,6 @@ public class UDPClient {
     private DatagramSocket socket;
     private int packetNumber = 0;
     private ExecutorService executorService;
-    private InetAddress IPAddress;
     private int serverPort = 9876;
 
     private static String[] getFileListing() {
@@ -75,7 +74,7 @@ public class UDPClient {
                 socket.send(newPacket.getPacket());
                 System.out.println("Message sent from client");
 
-                // wait time before sending the packet
+                // wait time before sending the next packet
                 TimeUnit.SECONDS.sleep(1);
             }
         } catch (IOException | InterruptedException e) {
@@ -94,44 +93,10 @@ public class UDPClient {
                 // submits a task to the thread pool to handle the packet
                 executorService.submit(() -> handlePacket(incomingPacket));
 
+                // wait time before receiving the next packet
+                TimeUnit.SECONDS.sleep(1);
             }
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-    }
-
-    public void createAndListenSocket() {
-        try {
-            while (true) {
-                socket = new DatagramSocket();
-                InetAddress IPAddress = InetAddress.getByName("localhost");
-                byte[] incomingData = new byte[1024];
-
-                // Create and send a packet
-                String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876,
-                        packetNumber++, fileList);
-
-                heartBeat();
-                socket.send(newPacket.getPacket());
-                System.out.println("Message sent from client");
-
-                // Receive response from server
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                socket.receive(incomingPacket);
-
-                // submit a task to the thread pool to handle the packet
-                executorService.submit(() -> handlePacket(incomingPacket));
-
-                String response = new String(incomingPacket.getData());
-                System.out.println("Response from server: " + response);
-            }
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -186,11 +151,11 @@ public class UDPClient {
 
         try {
             List<InetAddress> ipAddresses = new ArrayList<>();
-            ipAddresses.add(InetAddress.getByName("localhost"));
-            ipAddresses.add(InetAddress.getByName("localhost"));
-            ipAddresses.add(InetAddress.getByName("localhost"));
-            ipAddresses.add(InetAddress.getByName("localhost"));
-            ipAddresses.add(InetAddress.getByName("localhost"));
+            ipAddresses.add(InetAddress.getByName("10.111.119.140"));
+            // ipAddresses.add(InetAddress.getByName("localhost"));
+            // ipAddresses.add(InetAddress.getByName("localhost"));
+            // ipAddresses.add(InetAddress.getByName("localhost"));
+            // ipAddresses.add(InetAddress.getByName("localhost"));
 
             UDPClient client = new UDPClient();
             // create separate threads for sending messages to each IP address
