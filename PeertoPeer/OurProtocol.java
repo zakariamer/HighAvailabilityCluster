@@ -109,7 +109,7 @@ public class OurProtocol implements Serializable{
             if (dataParts[5].equals("null") || dataParts[5].isEmpty()) {
                 this.packetNumber = -1;  // Default value or handle appropriately
             } else {
-                this.packetNumber = Integer.parseInt(dataParts[4]);
+                this.packetNumber = Integer.parseInt(dataParts[5]);
             }
 
             List<String> filteredFiles = new ArrayList<>();
