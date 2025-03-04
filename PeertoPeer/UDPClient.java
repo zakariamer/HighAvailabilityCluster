@@ -12,9 +12,14 @@ import java.security.SecureRandom;
 
 public class UDPClient {
 
+    // hint:Use a concurent hash map(static reference)to create the nodes , store socket and data of other computers
+
+    // hint:Create 3 three threads those 3 are recieve, send/heartbeat and check heartbeat(Determine if the nodes )
+    // hint: the fourth thread is main for printing 
+
     private DatagramSocket socket;
     private int packetNumber = 0;
-    private ExecutorService executorService;
+    private static  ExecutorService executorService;
     private int serverPort = 9876;
 
     private static String[] getFileListing() {
@@ -37,6 +42,7 @@ public class UDPClient {
     }
 
     public static void heartBeat() {
+        
         SecureRandom random = new SecureRandom();
 
         int sec = random.nextInt(30) + 1;
@@ -51,6 +57,8 @@ public class UDPClient {
     }
 
     public UDPClient() {
+        // Scan everything from Ip config and store in hashmap 
+        
         try {
             // create the socket assuming the server is listening on port 9876
             socket = new DatagramSocket(9876);
@@ -64,6 +72,10 @@ public class UDPClient {
     }
 
     public void sendMessages(InetAddress IPAddress) {
+
+        // hint:Loop through the other nodes and for each of them send data
+        // hint: when  send the message use byteArrayOutputStream and ObjectOutputStream 
+
         try {
             while (true) {
                 String[] fileList = getFileListing();
@@ -83,24 +95,35 @@ public class UDPClient {
     }
 
     public void receiveMessages() {
-        try {
-            byte[] incomingData = new byte[1024];
+        // hint: Dont make a thread in a thread 
+        // hint: make threads loop for ever (Use while true) do this in all threads.
 
-            while (true) {
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                socket.receive(incomingPacket);
+        byte[] incomingData = new byte[1024];
+        DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+        
 
-                // submits a task to the thread pool to handle the packet
-                executorService.submit(() -> handlePacket(incomingPacket));
-
-                // wait time before receiving the next packet
-                TimeUnit.SECONDS.sleep(1);
+        while(true){
+            try {
+    
+              
+                    socket.receive(incomingPacket);
+                    handlePacket(incomingPacket);
+    
+                    // submits a task to the thread pool to handle the packet
+                    // executorService.submit(() -> handlePacket(incomingPacket));
+    
+                    // wait time before receiving the next packet
+                    TimeUnit.SECONDS.sleep(1);
+                
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+
         }
     }
 
+    // hint:does nothing for right now 
+    // hint: Take what handlepacket is doing and put it in recieve dont create a new thread for it 
     private void handlePacket(DatagramPacket incomingPacket) {
         try {
 
@@ -130,47 +153,47 @@ public class UDPClient {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(getFileListing());
-        // client.createAndListenSocket();
+    public void checkHeartbeat(){
+        while(true){
+            System.out.println("Checking heartbeat ...");
+            heartBeat();
+            System.out.println("Possible node failure.");
+        }
+    }
 
-        // // create seperate threads for sending and receiving messages
-        // Thread sendThread = new Thread(client:: sendMessages);
-        // Thread receiveThread = new Thread(client:: receiveMessages);
+    public void start(InetAddress IPAddress){
+        Runnable[] tasks = {
+            this::receiveMessages,
+            this::checkHeartbeat
+        };
+        
 
-        // sendThread.start();
-        // receiveThread.start();
+        for (Runnable task : tasks) {
+            executorService.submit(task);
+        }
 
-        // try{
-        // sendThread.join();
-        // receiveThread.join();
-        // } catch(InterruptedException e) {
-        // e.printStackTrace();
-
+        // for(InetAddress ipAddress : ipAddress){
+        //     executorService.submit(() -> sendMessages(ipAddress));
         // }
+    }
 
-        try {
-            List<InetAddress> ipAddresses = new ArrayList<>();
-            ipAddresses.add(InetAddress.getByName("10.111.119.140"));
-            // ipAddresses.add(InetAddress.getByName("localhost"));
-            // ipAddresses.add(InetAddress.getByName("localhost"));
-            // ipAddresses.add(InetAddress.getByName("localhost"));
-            // ipAddresses.add(InetAddress.getByName("localhost"));
+    public static void main(String[] args) {
 
-            UDPClient client = new UDPClient();
-            // create separate threads for sending messages to each IP address
-            for (InetAddress ipAddress : ipAddresses) {
-                Thread sendThread = new Thread(() -> client.sendMessages(ipAddress));
-                sendThread.start();
-            }
-
-            // create a thread for receiving messages
-            Thread receiveThread = new Thread(client::receiveMessages);
-            receiveThread.start();
-
-            // wait for the receive thread to complete
-            receiveThread.join();
-        } catch (UnknownHostException | InterruptedException e) {
+        try{
+            //System.out.println(getFileListing());
+                
+                InetAddress ipAddress = InetAddress.getByName("localhost");
+                UDPClient client = new UDPClient();
+                client.start(ipAddress);
+                
+                //keeps main thread alive to print status 
+                while(true){
+                    System.out.println("Running....");
+                    TimeUnit.SECONDS.sleep(10);
+    
+                }
+ 
+        }catch(IOException | InterruptedException e){
             e.printStackTrace();
         }
     }
