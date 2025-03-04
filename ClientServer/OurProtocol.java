@@ -1,4 +1,4 @@
-//package ClientServer;
+package ClientServer;
 
 import java.io.Serializable;
 import java.net.DatagramPacket;
@@ -47,7 +47,7 @@ public class OurProtocol implements Serializable{
         this.files = files;
 
         //packing the data into a compressable string -- protocol type, destination ip, sender ip, destination port, sender port, packet #, files
-        this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
+        this.data = this.protocolType + "," + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
         for(String file : files){
             this.data += "," + file;
             //System.out.println(file);
@@ -77,7 +77,7 @@ public class OurProtocol implements Serializable{
         this.files[0] = data;
 
         //packing the data into a compressable string -- protocol type, destination ip, sender ip, destination port, sender port, packet #, files
-        this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum + "," + data;
+        this.data = this.protocolType + "," + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum + "," + data;
 
         //packet form
         packet = new DatagramPacket(data.getBytes(), data.getBytes().length, destinationIP, destinationPort);
@@ -91,6 +91,10 @@ public class OurProtocol implements Serializable{
     public OurProtocol(DatagramPacket packet) {
         String unloadData = new String(packet.getData(), 0, packet.getLength());
         String[] dataParts = unloadData.split(",");
+
+        for(String i : dataParts){
+            System.out.println(i);
+        }
 
         if (dataParts[0].startsWith("En-cryptid's UDP")) {
             this.protocolType = "En-cryptid's UDP";
