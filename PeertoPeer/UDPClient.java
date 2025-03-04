@@ -21,8 +21,10 @@ public class UDPClient {
 
     private DatagramSocket socket;
     private int packetNumber = 0;
+    
     private static  ExecutorService executorService;
     private int serverPort = 9876;
+    private static final ThreadLocal<Integer> threadNumber = new ThreadLocal<>();
 
     private static String[] getFileListing() {
         String filePath = System.getProperty("user.dir");
@@ -66,17 +68,21 @@ public class UDPClient {
             socket = new DatagramSocket(9876);
 
             // create a thread pool with 5 threads
-            executorService = Executors.newFixedThreadPool(5);
+            executorService = Executors.newFixedThreadPool(4);
         } catch (SocketException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void sendMessages(InetAddress IPAddress) {
 
         // hint:Loop through the other nodes and for each of them send data
-        // hint: when  send the message use byteArrayOutputStream and ObjectOutputStream 
+        // hint: when  send the message use byteArrayOutputStream and ObjectOutputStream
+
+        threadNumber.set((int) (Thread.currentThread().getId()% 4) + 1);
+        System.out.println("Thread " +  threadNumber.get()  + " is sending messages.");
 
         try {
             while (true) {
@@ -189,19 +195,20 @@ public class UDPClient {
     }
 
     public void start(InetAddress IPAddress){
-        Runnable[] tasks = {
-            this::receiveMessages,
-            this::checkHeartbeat
-        };
-        
+      executorService.submit(this::receiveMessages);
+      executorService.submit(this::checkHeartbeat);
+      executorService.submit(() -> sendMessages(IPAddress));
+      executorService.submit(() -> {
+        while(true){
+            System.out.println("Running...");
 
-        for (Runnable task : tasks) {
-            executorService.submit(task);
+            try{
+                Thread.sleep(1000);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
         }
-
-        // for(InetAddress ipAddress : ipAddress){
-        //     executorService.submit(() -> sendMessages(ipAddress));
-        // }
+      });
     }
 
     public static void main(String[] args) {
@@ -213,14 +220,14 @@ public class UDPClient {
                 UDPClient client = new UDPClient();
                 client.start(ipAddress);
                 
-                //keeps main thread alive to print status 
-                while(true){
-                    System.out.println("Running....");
-                    TimeUnit.SECONDS.sleep(10);
+                // //keeps main thread alive to print status 
+                // while(true){
+                //     System.out.println("Running....");
+                //     TimeUnit.SECONDS.sleep(10);
     
-                }
+                // }
  
-        }catch(IOException | InterruptedException e){
+        }catch(IOException  e){
             e.printStackTrace();
         }
     }
