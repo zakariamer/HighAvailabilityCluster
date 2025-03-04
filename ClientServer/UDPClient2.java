@@ -1,4 +1,4 @@
-package ClientServer;
+//package ClientServer;
 
 import java.io.IOException;
 import java.net.*;
@@ -87,5 +87,6 @@ public class UDPClient2
     {
         UDPClient2 client = new UDPClient2();
         client.createAndListenSocket();
+       
     }
 }

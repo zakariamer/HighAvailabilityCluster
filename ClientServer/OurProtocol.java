@@ -1,4 +1,4 @@
-package ClientServer;
+//package ClientServer;
 
 import java.io.Serializable;
 import java.net.DatagramPacket;
