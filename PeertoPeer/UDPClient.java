@@ -1,4 +1,4 @@
-package PeertoPeer;
+//package PeertoPeer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +90,9 @@ public class UDPClient {
                 OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
                         serverPort, packetNumber, fileList);
 
+                        System.out.println("Sending message #" + packetNumber);
+
+
                 // read config
                 try{
                     File inFile = new File("PeertoPeer/Config.txt");
@@ -103,7 +106,7 @@ public class UDPClient {
                         //     scan.nextLine(); //skip this node and it's port
                         // } else {
                             String port = scan.nextLine();
-                            OurProtocol packet = new OurProtocol(InetAddress.getByName(line), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
+                            OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
                             socket.send(packet.getPacket()); 
                         // }
                     }
@@ -120,71 +123,83 @@ public class UDPClient {
                 packetNumber++;
 
                 // wait time before sending the next packet
-                TimeUnit.SECONDS.sleep(1);
+                Thread.sleep(1000);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    
     public void receiveMessages() {
-        // hint: Dont make a thread in a thread 
-        // hint: make threads loop for ever (Use while true) do this in all threads.
-
         byte[] incomingData = new byte[1024];
         DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-        
-
-        while(true){
+    
+        while (true) {
             try {
-    
-              
-                    socket.receive(incomingPacket);
-                    handlePacket(incomingPacket);
-    
-                    // submits a task to the thread pool to handle the packet
-                    // executorService.submit(() -> handlePacket(incomingPacket));
-    
-                    // wait time before receiving the next packet
-                    TimeUnit.SECONDS.sleep(1);
+                socket.receive(incomingPacket);
                 
+                String message = new String(incomingPacket.getData()).trim();
+                System.out.println("Received: " + message);
+    
+                if (message.equals("THEEND")) {
+                    System.out.println("Termination message received.");
+                    socket.close();
+                    executorService.shutdown();
+                    return;
+                }
+    
+                System.out.println("Client Details: PORT " + incomingPacket.getPort()
+                        + ", IP Address: " + incomingPacket.getAddress());
+    
+                // send acknowledgment only once
+                InetAddress IPAddress = incomingPacket.getAddress();
+                int port = incomingPacket.getPort();
+                String reply = "ACK: Received message";
+                byte[] data = reply.getBytes();
+                DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
+                socket.send(replyPacket);
+                System.out.println("Sent acknowledgment.");
+                
+                //Avoid unnecessary delays
+                Thread.sleep(1000);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
     }
+    
 
-    // hint:does nothing for right now 
-    // hint: Take what handlepacket is doing and put it in recieve dont create a new thread for it 
-    private void handlePacket(DatagramPacket incomingPacket) {
-        try {
+    // // hint:does nothing for right now 
+    // // hint: Take what handlepacket is doing and put it in recieve dont create a new thread for it 
+    // private void handlePacket(DatagramPacket incomingPacket) {
+    //     try {
 
-            // retrieve the data
-            String message = new String(incomingPacket.getData());
+    //         // retrieve the data
+    //         String message = new String(incomingPacket.getData());
 
-            // terminate if it is "THEEND" message from the client
-            if (message.equals("THEEND")) {
-                socket.close();
-                executorService.shutdown();
-                return;
-            }
-            System.out.println("Received message from client: " + message);
-            System.out.println("Client Details:PORT " + incomingPacket.getPort()
-                    + ", IP Address:" + incomingPacket.getAddress());
+    //         // terminate if it is "THEEND" message from the client
+    //         if (message.equals("THEEND")) {
+    //             socket.close();
+    //             executorService.shutdown();
+    //             return;
+    //         }
+    //         System.out.println("Received message from client: " + message);
+    //         System.out.println("Client Details:PORT " + incomingPacket.getPort()
+    //                 + ", IP Address:" + incomingPacket.getAddress());
 
-            // retrieve client socket info and create response packet
-            InetAddress IPAddress = incomingPacket.getAddress();
-            int port = incomingPacket.getPort();
-            String reply = "Thank you for the message";
-            byte[] data = reply.getBytes();
-            DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
-            socket.send(replyPacket);
-        } catch (IOException e) {
+    //         // retrieve client socket info and create response packet
+    //         InetAddress IPAddress = incomingPacket.getAddress();
+    //         int port = incomingPacket.getPort();
+    //         String reply = "Thank you for the message";
+    //         byte[] data = reply.getBytes();
+    //         DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
+    //         socket.send(replyPacket);
+    //     } catch (IOException e) {
 
-            e.printStackTrace();
-        }
-    }
+    //         e.printStackTrace();
+    //     }
+    // }
 
     public void checkHeartbeat(){
         while(true){
@@ -194,22 +209,37 @@ public class UDPClient {
         }
     }
 
-    public void start(InetAddress IPAddress){
-      executorService.submit(this::receiveMessages);
-      executorService.submit(this::checkHeartbeat);
-      executorService.submit(() -> sendMessages(IPAddress));
-      executorService.submit(() -> {
-        while(true){
-            System.out.println("Running...");
-
-            try{
-                Thread.sleep(1000);
-            }catch (InterruptedException e){
-                e.printStackTrace();
+    public void start(InetAddress IPAddress) {
+        System.out.println("Starting all threads...");
+    
+        executorService.submit(() -> {
+            System.out.println("Thread 1: Receiving messages started.");
+            receiveMessages();
+        });
+    
+        executorService.submit(() -> {
+            System.out.println("Thread 2: Sending messages started.");
+            sendMessages(IPAddress);
+        });
+    
+        executorService.submit(() -> {
+            System.out.println("Thread 3: Checking heartbeat started.");
+            checkHeartbeat();
+        });
+    
+        executorService.submit(() -> {
+            System.out.println("Thread 4: Logger started.");
+            while (true) {
+                System.out.println("Running...");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-      });
+        });
     }
+    
 
     public static void main(String[] args) {
 
