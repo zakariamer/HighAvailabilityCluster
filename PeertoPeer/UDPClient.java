@@ -2,10 +2,12 @@
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
 import java.security.SecureRandom;
@@ -80,11 +82,36 @@ public class UDPClient {
             while (true) {
                 String[] fileList = getFileListing();
                 OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
-                        serverPort, packetNumber++, fileList);
+                        serverPort, packetNumber, fileList);
+
+                // read config
+                try{
+                    File inFile = new File("PeertoPeer/Config.txt");
+                    String line = "";
+                    Scanner scan = new Scanner(inFile);
+
+                    //checks if this port is this system's 
+                    while(scan.hasNextLine()){
+                        String ip = scan.nextLine();
+                        // if(ip.equals(IPAddress.getHostAddress())){
+                        //     scan.nextLine(); //skip this node and it's port
+                        // } else {
+                            String port = scan.nextLine();
+                            OurProtocol packet = new OurProtocol(InetAddress.getByName(line), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
+                            socket.send(packet.getPacket()); 
+                        // }
+                    }
+
+                } catch (FileNotFoundException e){
+                    System.out.println("The file you inputted does not exist."); //if file input is invalid
+                } catch (Exception e){
+                    System.out.println("An error has occurred"); //if alternate error has occured
+                }
 
                 heartBeat();
                 socket.send(newPacket.getPacket());
                 System.out.println("Message sent from client");
+                packetNumber++;
 
                 // wait time before sending the next packet
                 TimeUnit.SECONDS.sleep(1);
@@ -198,3 +225,5 @@ public class UDPClient {
         }
     }
 }
+
+
