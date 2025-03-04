@@ -1,4 +1,4 @@
-//package PeertoPeer;
+package PeertoPeer;
 
 import java.io.Serializable;
 import java.net.DatagramPacket;
@@ -47,7 +47,7 @@ public class OurProtocol implements Serializable{
         this.files = files;
 
         //packing the data into a compressable string -- protocol type, destination ip, sender ip, destination port, sender port, packet #, files
-        this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
+        this.data = this.protocolType + "," + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
         for(String file : files){
             this.data += "," + file;
             //System.out.println(file);
@@ -77,7 +77,7 @@ public class OurProtocol implements Serializable{
         this.files[0] = data;
 
         //packing the data into a compressable string -- protocol type, destination ip, sender ip, destination port, sender port, packet #, files
-        this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum + "," + data;
+        this.data = this.protocolType + "," + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum + "," + data;
 
         //packet form
         packet = new DatagramPacket(data.getBytes(), data.getBytes().length, destinationIP, destinationPort);
