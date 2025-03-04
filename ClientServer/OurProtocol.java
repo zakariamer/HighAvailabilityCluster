@@ -50,7 +50,7 @@ public class OurProtocol implements Serializable{
         this.data = this.protocolType + destinationIP.getHostAddress() + "," + senderIP.getHostAddress() + "," + destinationPort + "," + senderPort + "," + packetNum;
         for(String file : files){
             this.data += "," + file;
-            System.out.println(file);
+            //System.out.println(file);
         }
 
         packet = new DatagramPacket(data.getBytes(), data.getBytes().length, destinationIP, destinationPort);
