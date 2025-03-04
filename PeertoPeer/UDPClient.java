@@ -24,19 +24,18 @@ public class UDPClient {
         File[] fileListing = homeDirectory.listFiles();
 
         if (fileListing == null) {
-            return new String[]{"EMPTY"};
+            return new String[] { "EMPTY" };
         }
 
         List<String> fileNames = new ArrayList<>();
         for (File file : fileListing) {
-            if (!file.getName().equals(".git")) {  
+            if (!file.getName().equals(".git")) {
                 fileNames.add(file.getName());
             }
         }
 
         return fileNames.toArray(new String[0]);
     }
-
 
     public static void heartBeat() {
         SecureRandom random = new SecureRandom();
@@ -53,56 +52,54 @@ public class UDPClient {
     }
 
     public UDPClient() {
-        try 
-    	{
-    		//create the socket assuming the server is listening on port 9876
-			socket = new DatagramSocket(9876);
+        try {
+            // create the socket assuming the server is listening on port 9876
+            socket = new DatagramSocket(9876);
 
-            //create a thread pool with 5 threads
+            // create a thread pool with 5 threads
             executorService = Executors.newFixedThreadPool(5);
-		} 
-    	catch (SocketException e) 
-    	{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
-    // public void sendMessages(){
-    //     try{
-    //         while(true){
-    //             String[] fileList = getFileListing();
-    //             OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort, serverPort, packetNumber++, fileList);
+    public void sendMessages(InetAddress IPAddress) {
+        try {
+            while (true) {
+                String[] fileList = getFileListing();
+                OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
+                        serverPort, packetNumber++, fileList);
 
-    //             heartBeat();
-    //             socket.send(newPacket.getPacket());
-    //             System.out.println("Message sent from client");
+                heartBeat();
+                socket.send(newPacket.getPacket());
+                System.out.println("Message sent from client");
 
-    //             // wait time before sending the packet 
-    //             TimeUnit.SECONDS.sleep(1);
-    //         }
-    //     }catch(IOException | InterruptedException e){
-    //         e.printStackTrace();
-    //     }
-    // }
+                // wait time before sending the packet
+                TimeUnit.SECONDS.sleep(1);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-    // public void receiveMessages(){
-    //     try{
-    //         byte[] incomingData = new byte[1024];
+    public void receiveMessages() {
+        try {
+            byte[] incomingData = new byte[1024];
 
-    //         while(true){
-    //             DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-    //             socket.receive(incomingPacket);
+            while (true) {
+                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                socket.receive(incomingPacket);
 
-    //             //submits a task to the thread pool to handle the packet
-    //             executorService.submit(()-> handlePacket(incomingPacket));
-                
-    //         }
-    //         } catch (IOException e){
-                
-    //             e.printStackTrace();
-    //         }
-    //     }
+                // submits a task to the thread pool to handle the packet
+                executorService.submit(() -> handlePacket(incomingPacket));
+
+            }
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
 
     public void createAndListenSocket() {
         try {
@@ -113,18 +110,19 @@ public class UDPClient {
 
                 // Create and send a packet
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876, packetNumber++, fileList);
+                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876,
+                        packetNumber++, fileList);
 
                 heartBeat();
-                socket.send(newPacket.getPacket());  
+                socket.send(newPacket.getPacket());
                 System.out.println("Message sent from client");
 
                 // Receive response from server
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 socket.receive(incomingPacket);
 
-                //submit a task to the thread pool to handle the packet
-                executorService.submit(()-> handlePacket(incomingPacket));
+                // submit a task to the thread pool to handle the packet
+                executorService.submit(() -> handlePacket(incomingPacket));
 
                 String response = new String(incomingPacket.getData());
                 System.out.println("Response from server: " + response);
@@ -138,87 +136,74 @@ public class UDPClient {
         }
     }
 
-    private void handlePacket(DatagramPacket incomingPacket){
-        try{
+    private void handlePacket(DatagramPacket incomingPacket) {
+        try {
 
-            //retrieve the data
+            // retrieve the data
             String message = new String(incomingPacket.getData());
-            
-            //terminate if it is "THEEND" message from the client
-            if(message.equals("THEEND"))
-            {
+
+            // terminate if it is "THEEND" message from the client
+            if (message.equals("THEEND")) {
                 socket.close();
                 executorService.shutdown();
                 return;
             }
             System.out.println("Received message from client: " + message);
             System.out.println("Client Details:PORT " + incomingPacket.getPort()
-            + ", IP Address:" + incomingPacket.getAddress());
-            
-            //retrieve client socket info and create response packet
+                    + ", IP Address:" + incomingPacket.getAddress());
+
+            // retrieve client socket info and create response packet
             InetAddress IPAddress = incomingPacket.getAddress();
             int port = incomingPacket.getPort();
             String reply = "Thank you for the message";
             byte[] data = reply.getBytes();
             DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
             socket.send(replyPacket);
-        }
-        catch(IOException e){
+        } catch (IOException e) {
 
             e.printStackTrace();
         }
     }
 
-
-
-
     public static void main(String[] args) {
         System.out.println(getFileListing());
-        UDPClient client = new UDPClient();
-        //client.createAndListenSocket();
+        // client.createAndListenSocket();
 
-        
-        
-        // // create seperate threads for sending and receiving messages 
+        // // create seperate threads for sending and receiving messages
         // Thread sendThread = new Thread(client:: sendMessages);
-        // Thread receiveThread =  new Thread(client:: receiveMessages);
+        // Thread receiveThread = new Thread(client:: receiveMessages);
 
         // sendThread.start();
         // receiveThread.start();
 
         // try{
-        //     sendThread.join();
-        //     receiveThread.join();
+        // sendThread.join();
+        // receiveThread.join();
         // } catch(InterruptedException e) {
-        //     e.printStackTrace();
+        // e.printStackTrace();
 
         // }
 
         try {
             List<InetAddress> ipAddresses = new ArrayList<>();
-            ipAddresses.add(InetAddress.getByName("192.168.1.1"));
-            ipAddresses.add(InetAddress.getByName("192.168.1.2"));
-            ipAddresses.add(InetAddress.getByName("192.168.1.3"));
-            ipAddresses.add(InetAddress.getByName("192.168.1.4"));
-            ipAddresses.add(InetAddress.getByName("192.168.1.5"));
+            ipAddresses.add(InetAddress.getByName("localhost"));
+            ipAddresses.add(InetAddress.getByName("localhost"));
+            ipAddresses.add(InetAddress.getByName("localhost"));
+            ipAddresses.add(InetAddress.getByName("localhost"));
+            ipAddresses.add(InetAddress.getByName("localhost"));
 
-            UDPClient client = new UDPClient(ipAddresses);
-
-            // Create separate threads for sending messages to each IP address
+            UDPClient client = new UDPClient();
+            // create separate threads for sending messages to each IP address
             for (InetAddress ipAddress : ipAddresses) {
                 Thread sendThread = new Thread(() -> client.sendMessages(ipAddress));
                 sendThread.start();
             }
 
-            // Create a thread for receiving messages
+            // create a thread for receiving messages
             Thread receiveThread = new Thread(client::receiveMessages);
             receiveThread.start();
 
-            // Wait for all threads to complete
-            for (InetAddress ipAddress : ipAddresses) {
-                Thread sendThread = new Thread(() -> client.sendMessages(ipAddress));
-                sendThread.join();
-            }
+            // wait for the receive thread to complete
             receiveThread.join();
         } catch (UnknownHostException | InterruptedException e) {
             e.printStackTrace();

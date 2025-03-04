@@ -75,7 +75,7 @@ public class UDPServer {
                 OurProtocol deconstructPacket = new OurProtocol(incomingPacket);
                 deconstructPacket.protocolDetails();
                 
-                String reply = "Thank you for the message";
+                String reply = mapAvailable.toString();
                 byte[] data = reply.getBytes();
                 
                 DatagramPacket replyPacket =
