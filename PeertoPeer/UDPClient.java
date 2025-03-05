@@ -1,9 +1,10 @@
-package PeertoPeer;
+//package PeertoPeer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -131,8 +132,12 @@ public class UDPClient {
                 System.out.println("Message sent from client");
                 packetNumber++;
 
+                SecureRandom random = new SecureRandom();
+
+                int time = random.nextInt(30) + 1;
+
                 // wait time before sending the next packet
-                Thread.sleep(1000);
+                Thread.sleep(time * 1000);
             }
         } catch ( InterruptedException e) {
             e.printStackTrace();
