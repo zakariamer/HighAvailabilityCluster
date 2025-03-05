@@ -261,7 +261,7 @@ public class UDPClient {
             while (true) {
                 System.out.println("Running...");
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(30000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
