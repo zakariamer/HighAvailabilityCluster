@@ -116,7 +116,12 @@ public class PeerToPeer {
                         // } else {
                             String port = scan.nextLine();
                             OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
+                            
+                            heartBeat();
                             socket.send(packet.getPacket()); 
+                            //socket.send(newPacket.getPacket());
+                            System.out.println("Message sent from client");
+                            packetNumber++;
                         // }
                     }
 
@@ -125,12 +130,6 @@ public class PeerToPeer {
                 } catch (Exception e){
                     System.out.println("An error has occurred"); //if alternate error has occured
                 }
-
-                heartBeat();
-                //socket.send(newPacket.getPacket());
-                System.out.println("Message sent from client");
-                packetNumber++;
-
                 
             }
         } catch ( Exception e) {
@@ -144,9 +143,6 @@ public class PeerToPeer {
         DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
     
         while (true) {
-
-            try {
-                socket.receive(incomingPacket);
                 try {
                     socket.receive(incomingPacket);
     
@@ -167,24 +163,9 @@ public class PeerToPeer {
     
                     System.out.println("Client Details: PORT " + incomingPacket.getPort()
                             + ", IP Address: " + incomingPacket.getAddress());
-        
-                    // send acknowledgment only once
-                    InetAddress IPAddress = incomingPacket.getAddress();
-                    int port = incomingPacket.getPort();
-                    String reply = "ACK: Received message";
-                    byte[] data = reply.getBytes();
-                    DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
-                    socket.send(replyPacket);
-                    System.out.println("Sent acknowledgment.");
-                    
-                    //Avoid unnecessary delays
-                    //Thread.sleep(1000);
                 } catch (IOException  e) {
                     e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
     
@@ -290,5 +271,16 @@ public class PeerToPeer {
         }
     }
 }
+
+/*
+ * 10.0.2.15
+9876
+10.111.103.3
+9876
+10.111.111.93
+9876
+10.111.119.140
+9876
+ */
 
 
