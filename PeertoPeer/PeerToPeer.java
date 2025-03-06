@@ -104,7 +104,7 @@ public class PeerToPeer {
 
                 // read config
                 try{
-                    File inFile = new File("Config.txt");
+                    File inFile = new File("PeerToPeer/Config.txt");
                     String line = "";
                     Scanner scan = new Scanner(inFile);
 
@@ -149,39 +149,45 @@ public class PeerToPeer {
         DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
     
         while (true) {
+
             try {
                 socket.receive(incomingPacket);
-
-                //put hash
-                map.put(incomingPacket.getAddress(), 0);
-                mapAvailable.put(incomingPacket.getAddress(), " - Alive");
-
-                
-                String message = new String(incomingPacket.getData()).trim();
-                System.out.println("Received: " + message);
+                try {
+                    socket.receive(incomingPacket);
     
-                if (message.equals("THEEND")) {
-                    System.out.println("Termination message received.");
-                    socket.close();
-                    executorService.shutdown();
-                    return;
+                    //put hash
+                    map.put(incomingPacket.getAddress(), 0);
+                    mapAvailable.put(incomingPacket.getAddress(), " - Alive");
+    
+                    
+                    String message = new String(incomingPacket.getData()).trim();
+                    System.out.println("Received: " + message);
+        
+                    if (message.equals("THEEND")) {
+                        System.out.println("Termination message received.");
+                        socket.close();
+                        executorService.shutdown();
+                        return;
+                    }
+    
+                    System.out.println("Client Details: PORT " + incomingPacket.getPort()
+                            + ", IP Address: " + incomingPacket.getAddress());
+        
+                    // send acknowledgment only once
+                    InetAddress IPAddress = incomingPacket.getAddress();
+                    int port = incomingPacket.getPort();
+                    String reply = "ACK: Received message";
+                    byte[] data = reply.getBytes();
+                    DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
+                    socket.send(replyPacket);
+                    System.out.println("Sent acknowledgment.");
+                    
+                    //Avoid unnecessary delays
+                    Thread.sleep(1000);
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                System.out.println("Client Details: PORT " + incomingPacket.getPort()
-                        + ", IP Address: " + incomingPacket.getAddress());
-    
-                // send acknowledgment only once
-                InetAddress IPAddress = incomingPacket.getAddress();
-                int port = incomingPacket.getPort();
-                String reply = "ACK: Received message";
-                byte[] data = reply.getBytes();
-                DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
-                socket.send(replyPacket);
-                System.out.println("Sent acknowledgment.");
-                
-                //Avoid unnecessary delays
-                Thread.sleep(30000);
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -258,9 +264,8 @@ public class PeerToPeer {
         executorService.submit(() -> {
             System.out.println("Thread 4: Logger started.");
             while (true) {
-                System.out.println("Running...");
                 try {
-                    Thread.sleep(30000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
