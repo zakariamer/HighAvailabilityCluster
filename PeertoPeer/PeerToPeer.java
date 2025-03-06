@@ -131,14 +131,9 @@ public class PeerToPeer {
                 System.out.println("Message sent from client");
                 packetNumber++;
 
-                SecureRandom random = new SecureRandom();
-
-                int time = random.nextInt(30) + 1;
-
-                // wait time before sending the next packet
-                Thread.sleep(time * 1000);
+                
             }
-        } catch ( InterruptedException e) {
+        } catch ( Exception e) {
             e.printStackTrace();
         }
     }
@@ -183,8 +178,8 @@ public class PeerToPeer {
                     System.out.println("Sent acknowledgment.");
                     
                     //Avoid unnecessary delays
-                    Thread.sleep(1000);
-                } catch (IOException | InterruptedException e) {
+                    //Thread.sleep(1000);
+                } catch (IOException  e) {
                     e.printStackTrace();
                 }
             } catch (IOException e) {
@@ -263,13 +258,13 @@ public class PeerToPeer {
     
         executorService.submit(() -> {
             System.out.println("Thread 4: Logger started.");
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            // while (true) {
+            //     try {
+            //         Thread.sleep(1000);
+            //     } catch (InterruptedException e) {
+            //         e.printStackTrace();
+            //     }
+            // }
         });
     }
     
