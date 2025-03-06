@@ -24,7 +24,7 @@ public class PeerToPeer {
 
     //packet/socket sending details
     private DatagramSocket socket;
-    private int packetNumber = 0;
+    private int packetNumber = 1;
 
     private static  ExecutorService executorService;
     private int serverPort = 9876;
@@ -99,25 +99,25 @@ public class PeerToPeer {
                 // OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
                 //         serverPort, packetNumber, fileList);
 
-                System.out.println("Sending message #" + packetNumber);
-
-
+                
+                
                 // read config
                 try{
                     File inFile = new File("PeerToPeer/Config.txt");
                     String line = "";
                     Scanner scan = new Scanner(inFile);
-
+                    
                     //checks if this port is this system's 
                     while(scan.hasNextLine()){
                         String ip = scan.nextLine();
                         // if(ip.equals(IPAddress.getHostAddress())){
-                        //     scan.nextLine(); //skip this node and it's port
-                        // } else {
-                            String port = scan.nextLine();
-                            OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
-                            
-                            heartBeat();
+                            //     scan.nextLine(); //skip this node and it's port
+                            // } else {
+                                String port = scan.nextLine();
+                                OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
+                                
+                                heartBeat();
+                                System.out.println("Sending message #" + packetNumber);
                             socket.send(packet.getPacket()); 
                             //socket.send(newPacket.getPacket());
                             System.out.println("Message sent from client");
