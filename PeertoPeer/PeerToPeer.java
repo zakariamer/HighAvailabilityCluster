@@ -1,4 +1,4 @@
-package PeertoPeer;
+//package PeertoPeer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.*;
 import java.security.SecureRandom;
 
-public class UDPClient {
+public class PeerToPeer {
 
     // hint:Use a concurent hash map(static reference)to create the nodes , store socket and data of other computers
 
@@ -69,7 +69,7 @@ public class UDPClient {
         }
     }
 
-    public UDPClient() {
+    public PeerToPeer() {
         // Scan everything from Ip config and store in hashmap 
         
         try {
@@ -104,7 +104,7 @@ public class UDPClient {
 
                 // read config
                 try{
-                    File inFile = new File("PeertoPeer/Config.txt");
+                    File inFile = new File("Config.txt");
                     String line = "";
                     Scanner scan = new Scanner(inFile);
 
@@ -131,8 +131,12 @@ public class UDPClient {
                 System.out.println("Message sent from client");
                 packetNumber++;
 
+                SecureRandom random = new SecureRandom();
+
+                int time = random.nextInt(30) + 1;
+
                 // wait time before sending the next packet
-                Thread.sleep(1000);
+                Thread.sleep(time * 1000);
             }
         } catch ( InterruptedException e) {
             e.printStackTrace();
@@ -162,7 +166,7 @@ public class UDPClient {
                     executorService.shutdown();
                     return;
                 }
-    
+
                 System.out.println("Client Details: PORT " + incomingPacket.getPort()
                         + ", IP Address: " + incomingPacket.getAddress());
     
@@ -256,7 +260,7 @@ public class UDPClient {
             while (true) {
                 System.out.println("Running...");
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(30000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -271,7 +275,7 @@ public class UDPClient {
             //System.out.println(getFileListing());
                 
                 InetAddress ipAddress = InetAddress.getByName("localhost");
-                UDPClient client = new UDPClient();
+                PeerToPeer client = new PeerToPeer();
                 client.start(ipAddress);
                 
                 // //keeps main thread alive to print status 

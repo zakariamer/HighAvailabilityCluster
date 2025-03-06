@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.io.File;
 import java.io.IOException;
@@ -52,8 +53,14 @@ public class UDPClient {
     public void createAndListenSocket() {
         try {
             while (true) {
+                File inFile = new File("ClientServer/Config.txt");
+                String line = "";
+                Scanner scan = new Scanner(inFile);
+                line = scan.nextLine();
+                scan.close();
+
                 Socket = new DatagramSocket();
-                InetAddress IPAddress = InetAddress.getByName("localhost");
+                InetAddress IPAddress = InetAddress.getByName(line);
                 byte[] incomingData = new byte[1024];
 
                 // Create and send a packet
@@ -80,7 +87,6 @@ public class UDPClient {
     }
 
     public static void main(String[] args) {
-        System.out.println(getFileListing());
         UDPClient client = new UDPClient();
         client.createAndListenSocket();       
     }
