@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +15,7 @@ import java.io.IOException;
 import java.net.*;
 import java.security.SecureRandom;
 
-public class UDPClient {
+public class PeerToPeer {
 
     // hint:Use a concurent hash map(static reference)to create the nodes , store socket and data of other computers
 
@@ -70,7 +69,7 @@ public class UDPClient {
         }
     }
 
-    public UDPClient() {
+    public PeerToPeer() {
         // Scan everything from Ip config and store in hashmap 
         
         try {
@@ -105,7 +104,7 @@ public class UDPClient {
 
                 // read config
                 try{
-                    File inFile = new File("PeertoPeer/Config.txt");
+                    File inFile = new File("Config.txt");
                     String line = "";
                     Scanner scan = new Scanner(inFile);
 
@@ -167,7 +166,7 @@ public class UDPClient {
                     executorService.shutdown();
                     return;
                 }
-    
+
                 System.out.println("Client Details: PORT " + incomingPacket.getPort()
                         + ", IP Address: " + incomingPacket.getAddress());
     
@@ -276,7 +275,7 @@ public class UDPClient {
             //System.out.println(getFileListing());
                 
                 InetAddress ipAddress = InetAddress.getByName("localhost");
-                UDPClient client = new UDPClient();
+                PeerToPeer client = new PeerToPeer();
                 client.start(ipAddress);
                 
                 // //keeps main thread alive to print status 
