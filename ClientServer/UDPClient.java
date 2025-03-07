@@ -75,6 +75,7 @@ public class UDPClient {
                 String line = "";
                 Scanner scan = new Scanner(inFile);
                 line = scan.nextLine();
+                int serverPort = Integer.parseInt(scan.nextLine());
                 scan.close();
 
                 // Create a datagram socket
@@ -84,7 +85,7 @@ public class UDPClient {
 
                 // Create and send a packet
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), 9876,
+                OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getLoopbackAddress(), serverPort,
                         Socket.getLocalPort(), packetNumber++, fileList);
 
                 heartBeat();
