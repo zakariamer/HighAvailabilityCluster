@@ -53,7 +53,7 @@ public class UDPClient {
     public void createAndListenSocket() {
         try {
             while (true) {
-                File inFile = new File("ClientServer/Config.txt");
+                File inFile = new File("Config.txt");
                 String line = "";
                 Scanner scan = new Scanner(inFile);
                 line = scan.nextLine();

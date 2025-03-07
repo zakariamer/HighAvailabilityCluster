@@ -75,8 +75,8 @@ public class PeerToPeer {
         
         try {
             // create the socket assuming the server is listening on port 9876
-            File inFile = new File("PeerToPeer/Config.txt");
-            File mySocket = new File("PeerToPeer/MySocket.txt");
+            File inFile = new File("Config.txt");
+            File mySocket = new File("MySocket.txt");
             Scanner scan = new Scanner(inFile);
             Scanner myPort = new Scanner(mySocket);
 
@@ -125,7 +125,7 @@ public class PeerToPeer {
                 
                 // read config
                 try{
-                    File inFile = new File("PeerToPeer/Config.txt");
+                    File inFile = new File("Config.txt");
                     Scanner scan = new Scanner(inFile);
 
 
