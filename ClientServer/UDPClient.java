@@ -102,6 +102,12 @@ public class UDPClient {
                     Socket.receive(incomingPacket);
                     String response = new String(incomingPacket.getData());
                     System.out.println("Response from server: " + response);
+
+                    String[] dataParts = response.split("$");
+                    for(String ipInfo : dataParts){
+                        System.out.println(ipInfo);
+                    }
+                    
                 } catch (SocketTimeoutException e) {
                     System.out.println("No response from server, resending...");
                 }

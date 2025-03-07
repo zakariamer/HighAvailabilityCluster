@@ -22,6 +22,7 @@ public class UDPServer {
     // Maps to keep track of client statuses
     HashMap<InetAddress, Integer> map = new HashMap<>();
     HashMap<InetAddress, String> mapAvailable = new HashMap<>();
+    HashMap<InetAddress, String> fileMap = new HashMap<>();
 
     // Scheduled executor service for periodic tasks
     ScheduledExecutorService timer = Executors.newScheduledThreadPool(2);
@@ -80,16 +81,27 @@ public class UDPServer {
                 // Update client status
                 map.put(IPAddress, 0);
                 mapAvailable.put(IPAddress, " - Alive");
+                
 
                 // Process the incoming packet using OurProtocol
                 OurProtocol deconstructPacket = new OurProtocol(incomingPacket);
                 deconstructPacket.protocolDetails();
+                fileMap.put(IPAddress, deconstructPacket.files().toString());
+
+                // Build a string with IP, active/deactive, and files
+                String nodeDetails = "";
+                for (InetAddress ip : map.keySet()) {
+                    String availability = mapAvailable.get(ip);
+                    String files = fileMap.get(ip);
+                    nodeDetails += "IP: " + ip.getHostAddress() + " " + availability
+                            + " - " + files + "$";
+                }
+                System.out.println(nodeDetails);
 
                 // Send reply to client
-                String reply = mapAvailable.toString();
-                byte[] data = reply.getBytes();
-                DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
-                socket.send(replyPacket);
+                byte[] data = nodeDetails.getBytes();
+                OurProtocol replyPacket = new OurProtocol(IPAddress, InetAddress.getLocalHost(), port, 9876, 1, nodeDetails);
+                socket.send(replyPacket.getPacket());
 
                 // Sleep for 2 seconds before processing the next packet
                 Thread.sleep(2000);
