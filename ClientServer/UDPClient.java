@@ -81,6 +81,7 @@ public class UDPClient {
                 // Create a datagram socket
                 Socket = new DatagramSocket();
                 InetAddress IPAddress = InetAddress.getByName(line);
+                InetAddress localIPAddress = InetAddress.getLocalHost(); // Get the local IP address
                 byte[] incomingData = new byte[1024];
 
                 // Set timeout to 5 seconds
@@ -88,7 +89,7 @@ public class UDPClient {
 
                 // Create and send a packet
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getLoopbackAddress(), serverPort,
+                OurProtocol newPacket = new OurProtocol(IPAddress, localIPAddress, serverPort,
                         Socket.getLocalPort(), packetNumber++, fileList);
 
                 heartBeat();
