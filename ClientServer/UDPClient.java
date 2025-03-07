@@ -65,7 +65,7 @@ public class UDPClient {
 
                 // Create and send a packet
                 String[] fileList = getFileListing();
-                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, 9876, packetNumber++, fileList);
+                OurProtocol newPacket = new OurProtocol(IPAddress, Inet4Address.getByName("localhost"), 9876, Socket.getLocalPort(), packetNumber++, fileList);
 
                 heartBeat();
                 Socket.send(newPacket.getPacket());  
