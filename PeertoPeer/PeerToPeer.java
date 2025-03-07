@@ -77,16 +77,13 @@ public class PeerToPeer {
             // create the socket assuming the server is listening on port 9876
             File inFile = new File("PeerToPeer/Config.txt");
             Scanner scan = new Scanner(inFile);
-            socket = new DatagramSocket();
 
             if (scan.hasNextLine()) {
                 String localIP = scan.nextLine().trim();
-                String localPortStr = scan.nextLine().trim();
-                int localPort = Integer.parseInt(localPortStr);
     
                 // Bind socket to the specified local port
-                socket = new DatagramSocket(localPort);
-                System.out.println("Bound to local port: " + localPort);
+                socket = new DatagramSocket(9877);
+                System.out.println("Bound to local port: " + socket.getLocalPort());
             } else {
                 System.out.println("Config file is empty or incorrect format.");
                 socket = new DatagramSocket(); // Default to system-assigned port
@@ -138,9 +135,10 @@ public class PeerToPeer {
                         }
                         String port = scan.nextLine().trim();
                         InetAddress remoteIPAddress = InetAddress.getByName(ip);
+                        System.out.println(ip + " " + port);
                         int remotePort = Integer.parseInt(port);
 
-                        OurProtocol packet = new OurProtocol(localIPAddress, remoteIPAddress, remotePort, socket.getLocalPort(), packetNumber, fileList);
+                        OurProtocol packet = new OurProtocol(remoteIPAddress, localIPAddress, remotePort, socket.getLocalPort(), packetNumber, fileList);
 
                             socket.send(packet.getPacket()); 
                             
