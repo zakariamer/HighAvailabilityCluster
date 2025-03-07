@@ -83,6 +83,9 @@ public class UDPClient {
                 InetAddress IPAddress = InetAddress.getByName(line);
                 byte[] incomingData = new byte[1024];
 
+                // Set timeout to 5 seconds
+                Socket.setSoTimeout(5000);
+
                 // Create and send a packet
                 String[] fileList = getFileListing();
                 OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getLoopbackAddress(), serverPort,
@@ -92,11 +95,15 @@ public class UDPClient {
                 Socket.send(newPacket.getPacket());
                 System.out.println("Message sent from client");
 
-                // Receive response from server
-                DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                Socket.receive(incomingPacket);
-                String response = new String(incomingPacket.getData());
-                System.out.println("Response from server: " + response);
+                try {
+                    // Receive response from server
+                    DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+                    Socket.receive(incomingPacket);
+                    String response = new String(incomingPacket.getData());
+                    System.out.println("Response from server: " + response);
+                } catch (SocketTimeoutException e) {
+                    System.out.println("No response from server, resending...");
+                }
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
