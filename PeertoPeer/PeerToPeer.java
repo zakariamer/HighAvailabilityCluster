@@ -119,7 +119,7 @@ public class PeerToPeer {
                                 
                             socket.send(packet.getPacket()); 
                             //socket.send(newPacket.getPacket());
-                            System.out.println("Message sent from client");
+                            //System.out.println("Message sent from client");
                             
                         // }
                     }
@@ -260,6 +260,21 @@ public class PeerToPeer {
             // }
         });
     }
+
+    public static InetAddress getLocalIPAddress() throws SocketException, UnknownHostException {
+        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = networkInterfaces.nextElement();
+            Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+            while (inetAddresses.hasMoreElements()) {
+                InetAddress inetAddress = inetAddresses.nextElement();
+                if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                    return inetAddress;
+                }
+            }
+        }
+        return InetAddress.getLocalHost();
+    }
     
 
     public static void main(String[] args) {
@@ -267,13 +282,12 @@ public class PeerToPeer {
         try{
             //System.out.println(getFileListing());
                 
-                InetAddress ipAddress = InetAddress.getLocalHost();
-                System.out.println(java.net.InetAddress.getLocalHost().getHostAddress()); 
-                System.out.println(ipAddress);               
+            InetAddress ipAddress = getLocalIPAddress();
+            System.out.println("Local IP Address: " + ipAddress.getHostAddress()); 
+            System.out.println(ipAddress);               
 
-                PeerToPeer client = new PeerToPeer();
-                client.start(ipAddress);
-                
+            PeerToPeer client = new PeerToPeer();
+            client.start(ipAddress);
                 // //keeps main thread alive to print status 
                 // while(true){
                 //     System.out.println("Running....");
