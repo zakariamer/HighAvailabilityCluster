@@ -96,7 +96,6 @@ public class UDPServer {
                     nodeDetails += "IP: " + ip.getHostAddress() + " " + availability
                             + " - " + files + "$";
                 }
-                System.out.println(nodeDetails);
 
                 // Send reply to client
                 byte[] data = nodeDetails.getBytes();

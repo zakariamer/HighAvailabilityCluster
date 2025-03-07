@@ -101,9 +101,9 @@ public class UDPClient {
                     DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                     Socket.receive(incomingPacket);
                     String response = new String(incomingPacket.getData());
-                    System.out.println("Response from server: " + response);
-
-                    String[] dataParts = response.split("$");
+                    
+                    //print out nodes
+                    String[] dataParts = response.split("\\$");
                     for(String ipInfo : dataParts){
                         System.out.println(ipInfo);
                     }
