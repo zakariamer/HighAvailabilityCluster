@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "UDPServer",
+            "request": "launch",
+            "mainClass": "UDPServer",
+            "projectName": "HighAvailabilityCluster_2f2ddb8"
+        },
+        {
+            "type": "java",
+            "name": "UDPClient",
+            "request": "launch",
+            "mainClass": "UDPClient",
+            "projectName": "HighAvailabilityCluster_2f2ddb8"
+        },
+        {
+            "type": "java",
             "name": "PeerToPeer",
             "request": "launch",
             "mainClass": "PeerToPeer",

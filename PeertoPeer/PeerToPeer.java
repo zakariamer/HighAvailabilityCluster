@@ -28,7 +28,7 @@ public class PeerToPeer {
     private int packetNumber = 1;
 
     private static  ExecutorService executorService;
-    private int serverPort = 9876;
+   
     private static final ThreadLocal<Integer> threadNumber = new ThreadLocal<>();
     
     //node checking details
@@ -75,18 +75,41 @@ public class PeerToPeer {
         
         try {
             // create the socket assuming the server is listening on port 9876
-            socket = new DatagramSocket(9876);
+            File inFile = new File("PeerToPeer/Config.txt");
+            Scanner scan = new Scanner(inFile);
+            socket = new DatagramSocket();
+
+            if (scan.hasNextLine()) {
+                String localIP = scan.nextLine().trim();
+                String localPortStr = scan.nextLine().trim();
+                int localPort = Integer.parseInt(localPortStr);
+    
+                // Bind socket to the specified local port
+                socket = new DatagramSocket(localPort);
+                System.out.println("Bound to local port: " + localPort);
+            } else {
+                System.out.println("Config file is empty or incorrect format.");
+                socket = new DatagramSocket(); // Default to system-assigned port
+            }
+
+            scan.close();
 
             // create a thread pool with 5 threads
             executorService = Executors.newFixedThreadPool(4);
-        } catch (SocketException e) {
-            // TODO Auto-generated catch block
+        } catch (FileNotFoundException e) {
+            System.out.println("Config file not found. Using default port.");
+            try {
+                socket = new DatagramSocket();
+            } catch (SocketException ex) {
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @SuppressWarnings("deprecation")
-    public void sendMessages(InetAddress IPAddress) {
+    public void sendMessages(InetAddress localIPAddress) {
 
        
         threadNumber.set((int) (Thread.currentThread().getId()% 4) + 1);
@@ -101,28 +124,28 @@ public class PeerToPeer {
                 // read config
                 try{
                     File inFile = new File("PeerToPeer/Config.txt");
-                    String line = "";
                     Scanner scan = new Scanner(inFile);
 
 
                     System.out.println("Sending message #" + packetNumber);
 
                     //checks if this port is this system's 
-                    while(scan.hasNextLine()){
-                        String ip = scan.nextLine();
-                        // if(ip.equals(IPAddress.getHostAddress())){
-                            //     scan.nextLine(); //skip this node and it's port
-                            // } else {
-                                String port = scan.nextLine();
-                                OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
-                                
-                                
+                    while (scan.hasNextLine()) {
+                        String ip = scan.nextLine().trim();
+                        if(!scan.hasNextLine()){
+                            System.out.println("Config file format incorrect.");
+                            break;
+                        }
+                        String port = scan.nextLine().trim();
+                        InetAddress remoteIPAddress = InetAddress.getByName(ip);
+                        int remotePort = Integer.parseInt(port);
+
+                        OurProtocol packet = new OurProtocol(localIPAddress, remoteIPAddress, remotePort, socket.getLocalPort(), packetNumber, fileList);
+
                             socket.send(packet.getPacket()); 
-                            //socket.send(newPacket.getPacket());
-                            //System.out.println("Message sent from client");
                             
-                        // }
                     }
+                    scan.close();
                     heartBeat();
                     packetNumber++;
 
@@ -176,37 +199,6 @@ public class PeerToPeer {
     }
     
 
-    // // hint:does nothing for right now 
-    // // hint: Take what handlepacket is doing and put it in recieve dont create a new thread for it 
-    // private void handlePacket(DatagramPacket incomingPacket) {
-    //     try {
-
-    //         // retrieve the data
-    //         String message = new String(incomingPacket.getData());
-
-    //         // terminate if it is "THEEND" message from the client
-    //         if (message.equals("THEEND")) {
-    //             socket.close();
-    //             executorService.shutdown();
-    //             return;
-    //         }
-    //         System.out.println("Received message from client: " + message);
-    //         System.out.println("Client Details:PORT " + incomingPacket.getPort()
-    //                 + ", IP Address:" + incomingPacket.getAddress());
-
-    //         // retrieve client socket info and create response packet
-    //         InetAddress IPAddress = incomingPacket.getAddress();
-    //         int port = incomingPacket.getPort();
-    //         String reply = "Thank you for the message";
-    //         byte[] data = reply.getBytes();
-    //         DatagramPacket replyPacket = new DatagramPacket(data, data.length, IPAddress, port);
-    //         socket.send(replyPacket);
-    //     } catch (IOException e) {
-
-    //         e.printStackTrace();
-    //     }
-    // }
-
     public void checkHeartbeat(){
         timer.scheduleAtFixedRate(() -> {
         synchronized(map){
@@ -231,7 +223,7 @@ public class PeerToPeer {
 
     }
 
-    public void start(InetAddress IPAddress) {
+    public void start(InetAddress localIPAddress) {
         System.out.println("Starting all threads...");
     
         executorService.submit(() -> {
@@ -241,7 +233,7 @@ public class PeerToPeer {
     
         executorService.submit(() -> {
             System.out.println("Thread 2: Sending messages started.");
-            sendMessages(IPAddress);
+            sendMessages(localIPAddress);
         });
     
         executorService.submit(() -> {
@@ -280,20 +272,16 @@ public class PeerToPeer {
     public static void main(String[] args) {
 
         try{
-            //System.out.println(getFileListing());
+            
                 
-            InetAddress ipAddress = getLocalIPAddress();
-            System.out.println("Local IP Address: " + ipAddress.getHostAddress()); 
-            System.out.println(ipAddress);               
+            InetAddress localIPAddress = getLocalIPAddress();
+            System.out.println("Local IP Address: " + localIPAddress.getHostAddress());
+            System.out.println(localIPAddress);
 
             PeerToPeer client = new PeerToPeer();
-            client.start(ipAddress);
-                // //keeps main thread alive to print status 
-                // while(true){
-                //     System.out.println("Running....");
-                //     TimeUnit.SECONDS.sleep(10);
-    
-                // }
+            client.start(localIPAddress);
+             
+                
  
         }catch(IOException  e){
             e.printStackTrace();
