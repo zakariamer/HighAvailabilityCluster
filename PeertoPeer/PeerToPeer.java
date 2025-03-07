@@ -70,7 +70,7 @@ public class PeerToPeer {
     }
 
     public PeerToPeer() {
-        // Scan everything from Ip config and store in hashmap 
+       
         
         try {
             // create the socket assuming the server is listening on port 9876
@@ -87,18 +87,14 @@ public class PeerToPeer {
     @SuppressWarnings("deprecation")
     public void sendMessages(InetAddress IPAddress) {
 
-        // hint:Loop through the other nodes and for each of them send data
-        // hint: when  send the message use byteArrayOutputStream and ObjectOutputStream
-
+       
         threadNumber.set((int) (Thread.currentThread().getId()% 4) + 1);
-        System.out.println("Thread " +  threadNumber.get()  + " is sending messages.");
+       
 
         try {
             while (true) {
                 String[] fileList = getFileListing();
-                // OurProtocol newPacket = new OurProtocol(IPAddress, InetAddress.getByName("localhost"), serverPort,
-                //         serverPort, packetNumber, fileList);
-
+               
                 
                 
                 // read config
@@ -116,7 +112,6 @@ public class PeerToPeer {
                                 String port = scan.nextLine();
                                 OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
                                 
-                                heartBeat();
                                 System.out.println("Sending message #" + packetNumber);
                             socket.send(packet.getPacket()); 
                             //socket.send(newPacket.getPacket());
@@ -124,6 +119,7 @@ public class PeerToPeer {
                             packetNumber++;
                         // }
                     }
+                    heartBeat();
 
                 } catch (FileNotFoundException e){
                     System.out.println("The file you inputted does not exist."); //if file input is invalid
@@ -147,8 +143,11 @@ public class PeerToPeer {
                     socket.receive(incomingPacket);
     
                     //put hash
-                    map.put(incomingPacket.getAddress(), 0);
-                    mapAvailable.put(incomingPacket.getAddress(), " - Alive");
+                    synchronized(map){
+
+                        map.put(incomingPacket.getAddress(), 0);
+                        mapAvailable.put(incomingPacket.getAddress(), " - Alive");
+                    }
     
                     
                     String message = new String(incomingPacket.getData()).trim();
@@ -203,18 +202,24 @@ public class PeerToPeer {
 
     public void checkHeartbeat(){
         timer.scheduleAtFixedRate(() -> {
+        synchronized(map){
+
             for (Map.Entry<InetAddress, Integer> entry : map.entrySet()){
                 if (entry.getValue() >= 30){
                     mapAvailable.put(entry.getKey(), " - Dead");
                 }
             }
             System.out.println("Current connections: " + mapAvailable);
+        }
         }, 0, 30, TimeUnit.SECONDS);
 
         timer.scheduleAtFixedRate(() -> {
+        synchronized(map){
+
             for (Map.Entry<InetAddress, Integer> entry : map.entrySet()){
                 map.put(entry.getKey(),entry.getValue() + 1);
             }
+        }
         }, 0, 1, TimeUnit.SECONDS);
 
     }
