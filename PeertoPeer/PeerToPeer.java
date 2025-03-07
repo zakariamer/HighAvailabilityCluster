@@ -1,6 +1,7 @@
 //package PeertoPeer;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +103,10 @@ public class PeerToPeer {
                     File inFile = new File("PeerToPeer/Config.txt");
                     String line = "";
                     Scanner scan = new Scanner(inFile);
-                    
+
+
+                    System.out.println("Sending message #" + packetNumber);
+
                     //checks if this port is this system's 
                     while(scan.hasNextLine()){
                         String ip = scan.nextLine();
@@ -112,14 +116,15 @@ public class PeerToPeer {
                                 String port = scan.nextLine();
                                 OurProtocol packet = new OurProtocol(InetAddress.getByName(ip), IPAddress, (Integer) Integer.parseInt(port), serverPort, packetNumber, fileList);
                                 
-                                System.out.println("Sending message #" + packetNumber);
+                                
                             socket.send(packet.getPacket()); 
                             //socket.send(newPacket.getPacket());
                             System.out.println("Message sent from client");
-                            packetNumber++;
+                            
                         // }
                     }
                     heartBeat();
+                    packetNumber++;
 
                 } catch (FileNotFoundException e){
                     System.out.println("The file you inputted does not exist."); //if file input is invalid
@@ -149,19 +154,21 @@ public class PeerToPeer {
                         mapAvailable.put(incomingPacket.getAddress(), " - Alive");
                     }
     
+                    OurProtocol deconstructPacket = new OurProtocol(incomingPacket);
+                    deconstructPacket.protocolDetails();
                     
-                    String message = new String(incomingPacket.getData()).trim();
-                    System.out.println("Received: " + message);
+                    // String message = new String(incomingPacket.getData()).trim();
+                    // System.out.println("Received: " + message);
         
-                    if (message.equals("THEEND")) {
-                        System.out.println("Termination message received.");
-                        socket.close();
-                        executorService.shutdown();
-                        return;
-                    }
+                    // if (message.equals("THEEND")) {
+                    //     System.out.println("Termination message received.");
+                    //     socket.close();
+                    //     executorService.shutdown();
+                    //     return;
+                    // }
     
-                    System.out.println("Client Details: PORT " + incomingPacket.getPort()
-                            + ", IP Address: " + incomingPacket.getAddress());
+                    // System.out.println("Client Details: PORT " + incomingPacket.getPort()
+                    //         + ", IP Address: " + incomingPacket.getAddress());
                 } catch (IOException  e) {
                     e.printStackTrace();
                 }
@@ -260,7 +267,10 @@ public class PeerToPeer {
         try{
             //System.out.println(getFileListing());
                 
-                InetAddress ipAddress = InetAddress.getByName("localhost");
+                InetAddress ipAddress = InetAddress.getLocalHost();
+                System.out.println(java.net.InetAddress.getLocalHost().getHostAddress()); 
+                System.out.println(ipAddress);               
+
                 PeerToPeer client = new PeerToPeer();
                 client.start(ipAddress);
                 

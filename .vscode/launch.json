@@ -9,6 +9,13 @@
             "name": "PeerToPeer",
             "request": "launch",
             "mainClass": "PeerToPeer",
+            "projectName": "HighAvailabilityCluster_ea2dedd6"
+        },
+        {
+            "type": "java",
+            "name": "PeerToPeer",
+            "request": "launch",
+            "mainClass": "PeerToPeer",
             "projectName": "HighAvailabilityCluster_2f2ddb8"
         },
         {
